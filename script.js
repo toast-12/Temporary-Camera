@@ -75,7 +75,7 @@ function startRecording() {
     mediaRecorder = new MediaRecorder(canvas.captureStream(), options);
     mediaRecorder.ondataavailable = handleDataAvailable;
     mediaRecorder.start();
-    
+
     startRecordingButton.style.display = 'none';
     stopRecordingButton.style.display = 'inline';
     captureFrames();
@@ -166,21 +166,21 @@ function displayPicture(imageDataURL) {
     }
 
     picturesDiv.appendChild(img);
-    
+
     // Create delete button
     const deleteButton = document.createElement('button');
     deleteButton.textContent = '🗑️';
     deleteButton.addEventListener('click', () => {
         deleteImage(imageDataURL);
     });
-    
+
     // Create download button
     const downloadButton = document.createElement('button');
     downloadButton.textContent = '⬇️';
     downloadButton.addEventListener('click', () => {
         downloadImage(imageDataURL);
     });
-    
+
     // Append buttons to the image container
     const imageContainer = document.createElement('div');
     imageContainer.classList.add('image-container');
@@ -212,13 +212,27 @@ function downloadImage(imageDataURL) {
     document.body.removeChild(a);
 }
 
-function downloadContent() {
-    videos.forEach((video, index) => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(video.blob);
-        a.download = `video${index + 1}.webm`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+async function downloadContent() {
+    const zip = new JSZip();
+
+    // Adding images to the zip
+    images.forEach((imageDataURL, index) => {
+        const imageName = `image${index + 1}.jpg`;
+        zip.file(imageName, imageDataURL.split('base64,')[1], { base64: true });
     });
+
+    // Adding videos to the zip
+    await Promise.all(videos.map(async (video, index) => {
+        const videoName = `video${index + 1}.webm`;
+        const response = await fetch(video.url);
+        const videoBlob = await response.blob();
+        zip.file(videoName, videoBlob);
+    }));
+
+    // Generate zip file and trigger download
+    zip.generateAsync({ type: "blob" })
+        .then(function (blob) {
+            const zipFilename = "media_files.zip";
+            saveAs(blob, zipFilename);
+        });
 }
