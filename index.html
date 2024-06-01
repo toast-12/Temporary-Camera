@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporary Camera</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+</head>
+<body>
+    <div class="navbar-div">
+        <nav class="navbar">
+            <p>Temporary Camera</p>
+        </nav>
+    </div>
+
+    <video id="video" class="video" autoplay></video>
+
+    <div class="buttons">
+        <button id="captureButton">Capture Image</button>
+        <button id="startRecordingButton">Start Recording</button>
+        <button id="stopRecordingButton" style="display: none;">Stop Recording</button>
+        <button id="toggleButton">Transform</button>
+        <button id="downloadButton" disabled>Download</button>
+        <select id="filterSelect">
+            <option value="none">No Filter</option>
+            <option value="grayscale(100%)">Grayscale</option>
+            <option value="sepia(100%)">Sepia</option>
+            <option value="invert(100%)">Invert</option>
+            <option value="brightness(200%)">Brightness</option>
+            <option value="contrast(200%)">Contrast</option>
+            <option value="blur(5px)">Blur</option>
+        </select>
+        <button id="switchSidesButton">Switch Sides</button>
+    </div>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <div id="pictures"></div>
+    <canvas id="videoCanvas" style="display: none;"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
