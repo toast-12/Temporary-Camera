@@ -175,9 +175,9 @@ function displayPicture(imageDataURL) {
     });
 
     // Create download button
-    const downloadButton = document.createElement('button');
-    downloadButton.textContent = '⬇️';
-    downloadButton.addEventListener('click', () => {
+    const imageDownloadButton = document.createElement('button');
+    imageDownloadButton.textContent = '⬇️';
+    imageDownloadButton.addEventListener('click', () => {
         downloadImage(imageDataURL);
     });
 
@@ -186,7 +186,7 @@ function displayPicture(imageDataURL) {
     imageContainer.classList.add('image-container');
     imageContainer.appendChild(img);
     imageContainer.appendChild(deleteButton);
-    imageContainer.appendChild(downloadButton);
+    imageContainer.appendChild(imageDownloadButton);
     picturesDiv.appendChild(imageContainer);
 }
 
@@ -210,6 +210,12 @@ function downloadImage(imageDataURL) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    body.classList.toggle('light-mode');
 }
 
 async function downloadContent() {
