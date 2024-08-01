@@ -2,7 +2,7 @@ let frontCamera = true;
 let currentFilter = 'none';
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
-const videoCanvas = document.getElementById('videoCanvas');
+const picturesDiv = document.getElementById('pictures');
 const captureButton = document.getElementById('captureButton');
 const startRecordingButton = document.getElementById('startRecordingButton');
 const stopRecordingButton = document.getElementById('stopRecordingButton');
@@ -10,7 +10,8 @@ const toggleButton = document.getElementById('toggleButton');
 const downloadButton = document.getElementById('downloadButton');
 const filterSelect = document.getElementById('filterSelect');
 const switchSidesButton = document.getElementById('switchSidesButton');
-const picturesDiv = document.getElementById('pictures');
+const darkModeButton = document.getElementById('darkModeButton');
+
 let images = [];
 let videos = [];
 let recordedChunks = [];
@@ -30,7 +31,7 @@ async function startCamera() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     startCamera();
 
     toggleButton.addEventListener('click', () => {
@@ -61,6 +62,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     switchSidesButton.addEventListener('click', () => {
         video.classList.toggle('flip');
+    });
+
+    darkModeButton.addEventListener('click', () => {
+        toggleDarkMode();
     });
 });
 
@@ -132,7 +137,25 @@ function saveVideo() {
     }
     videoElement.style.filter = currentFilter;
 
-    picturesDiv.appendChild(videoElement);
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = '🗑️';
+    deleteButton.addEventListener('click', () => {
+        deleteVideo(url);
+    });
+
+    const videoDownloadButton = document.createElement('button');
+    videoDownloadButton.textContent = '⬇️';
+    videoDownloadButton.addEventListener('click', () => {
+        downloadVideo(url, blob);
+    });
+
+    const videoContainer = document.createElement('div');
+    videoContainer.classList.add('video-container');
+    videoContainer.appendChild(videoElement);
+    videoContainer.appendChild(deleteButton);
+    videoContainer.appendChild(videoDownloadButton);
+    picturesDiv.appendChild(videoContainer);
+
     videos.push({ url, blob });
     downloadButton.disabled = false;
 }
@@ -165,23 +188,18 @@ function displayPicture(imageDataURL) {
         img.style.transform = 'scaleX(-1)';
     }
 
-    picturesDiv.appendChild(img);
-
-    // Create delete button
     const deleteButton = document.createElement('button');
     deleteButton.textContent = '🗑️';
     deleteButton.addEventListener('click', () => {
         deleteImage(imageDataURL);
     });
 
-    // Create download button
     const imageDownloadButton = document.createElement('button');
     imageDownloadButton.textContent = '⬇️';
     imageDownloadButton.addEventListener('click', () => {
         downloadImage(imageDataURL);
     });
 
-    // Append buttons to the image container
     const imageContainer = document.createElement('div');
     imageContainer.classList.add('image-container');
     imageContainer.appendChild(img);
@@ -221,13 +239,11 @@ function toggleDarkMode() {
 async function downloadContent() {
     const zip = new JSZip();
 
-    // Adding images to the zip
     images.forEach((imageDataURL, index) => {
         const imageName = `image${index + 1}.jpg`;
         zip.file(imageName, imageDataURL.split('base64,')[1], { base64: true });
     });
 
-    // Adding videos to the zip
     await Promise.all(videos.map(async (video, index) => {
         const videoName = `video${index + 1}.webm`;
         const response = await fetch(video.url);
@@ -235,10 +251,33 @@ async function downloadContent() {
         zip.file(videoName, videoBlob);
     }));
 
-    // Generate zip file and trigger download
     zip.generateAsync({ type: "blob" })
-        .then(function (blob) {
+        .then(blob => {
             const zipFilename = "media_files.zip";
             saveAs(blob, zipFilename);
         });
+}
+
+function deleteVideo(videoUrl) {
+    const index = videos.findIndex(video => video.url === videoUrl);
+    if (index !== -1) {
+        videos.splice(index, 1);
+        refreshVideos();
+    }
+}
+
+function refreshVideos() {
+    picturesDiv.innerHTML = '';
+    videos.forEach(video => {
+        saveVideo();
+    });
+}
+
+function downloadVideo(videoUrl, blob) {
+    const a = document.createElement('a');
+    a.href = videoUrl;
+    a.download = 'video.webm';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
